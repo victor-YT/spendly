@@ -64,14 +64,22 @@ let adminId = existingAdmin?.id;
 if (!adminId) {
   const createdAt = new Date().toISOString();
   const passwordHash = bcrypt.hashSync(adminPassword, 10);
-  const result = db
+  db
     .prepare(
-      `INSERT INTO users (name, email, passwordHash, role, createdAt)
+      `INSERT OR IGNORE INTO users (name, email, passwordHash, role, createdAt)
        VALUES (?, ?, ?, 'admin', ?)`
     )
-    .run("Demo Admin", adminEmail, passwordHash, createdAt);
+    .run(["Demo Admin", adminEmail, passwordHash, createdAt]);
 
-  adminId = Number(result.lastInsertRowid);
+  const admin = db
+    .prepare("SELECT id FROM users WHERE email = ?")
+    .get(adminEmail) as { id: number } | undefined;
+
+  adminId = admin?.id;
+}
+
+if (!adminId) {
+  throw new Error("Unable to seed admin user.");
 }
 
 if (!hasColumn("expenses", "userId")) {

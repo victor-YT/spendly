@@ -1,69 +1,114 @@
 # Spendly
 
-## Overview
-
-Spendly is a production-style expense tracker dashboard built as a Single Page Application with Next.js, TypeScript, SQLite, Tailwind CSS, and Recharts. It provides a fast, responsive interface for recording, managing, and visualizing expenses without full page reloads.
-
-## Problem
-
-Managing expenses in spreadsheets or basic forms is often repetitive, difficult to maintain, and lacks clear visibility into spending patterns. Spendly addresses this by combining expense management and analytics in one streamlined dashboard.
+Spendly is a single-page-style expense tracker built for an Internet Programming assignment. It helps users record expenses, view spending charts, and manage their own expense history from a clean dashboard.
 
 ## Tech Stack
 
-- Next.js (App Router)
+- Next.js App Router
+- React
 - TypeScript
+- SQLite
+- better-sqlite3
+- bcryptjs for password hashing
+- JSON Web Tokens for authentication
 - Tailwind CSS
 - Recharts
-- SQLite with better-sqlite3
 
+## Main Features
 
-## Features
+- Register and log in
+- Passwords are hashed before saving
+- JWT authentication stored in an HttpOnly cookie
+- User and admin roles
+- User-owned expenses
+- Expense create, read, update, and delete
+- Dashboard cards and Recharts visualisations
+- Live search by title, category, and description
+- User activity logging for register, login, logout, create, update, and delete
+- Admin page for viewing users and activities
 
-- Full CRUD operations for expenses
-- SPA-style experience with instant UI updates
-- SQLite-backed persistent storage
-- Dashboard summary cards for key metrics
-- Spending insights with category and daily charts
-- Inline expense editing
-- Delete confirmation dialog
-- Toast notifications for user feedback
-- Loading states, empty states, and validation handling
-- Responsive SaaS-style dashboard UI
+## Conceptual Entities
 
-## Folder Structure
+- `users`
+- `expenses`
+- `user_activities`
 
-- `app/` – pages, API routes, global styles, and dashboard components
-- `app/api/expenses/` – expense CRUD API endpoints
-- `app/components/` – reusable UI components
-- `lib/` – database setup and shared utilities
-- `models/` – expense model and database access logic
-- `public/` – static assets
+## Demo Admin
 
-## Challenges
+The app seeds a demo admin account when the database is created.
 
-- Delivering a smooth SPA experience within the Next.js App Router
-- Keeping client state in sync after create, update, and delete actions
-- Structuring SQLite access cleanly with a lightweight model layer
-- Aggregating expense data for charts and summary metrics
-- Maintaining polished UX across loading, empty, and error states
-- Managing real-time UI consistency with optimistic updates
+- Email: `admin@spendly.local`
+- Password: `admin123`
+
+These can be changed with environment variables:
+
+```bash
+SEED_ADMIN_EMAIL=admin@spendly.local
+SEED_ADMIN_PASSWORD=admin123
+JWT_SECRET=change-this-local-secret
+```
+
+For local development, the app has a simple fallback JWT secret. For production, set `JWT_SECRET`.
 
 ## How to Run
 
 1. Install dependencies:
-   `npm install`
-2. Start the development server:
-   `npm run dev`
-3. Open `http://localhost:3000` in your browser
 
-The SQLite database file is created as `expenses.db` and the required table is initialized automatically on first run.
+```bash
+npm install
+```
 
-To run a production build:
+2. Optional: create `.env.local` from `.env.example`.
 
-1. Build the application:
-   `npm run build`
-2. Start the production server:
-   `npm run start`
+3. Start the development server:
+
+```bash
+npm run dev
+```
+
+4. Open `http://localhost:3000`.
+
+To build the project:
+
+```bash
+npm run build
+```
+
+To start the production build:
+
+```bash
+npm run start
+```
+
+## Database
+
+The SQLite database file is created automatically as `expenses.db` when the app runs. The schema is created and migrated in `lib/db.ts`.
+
+For submission, `database-export.sql` contains the database table structure for:
+
+- users
+- expenses
+- user_activities
+
+Local database runtime files such as `expenses.db`, `expenses.db-shm`, and `expenses.db-wal` are ignored by Git because they contain local test data.
+
+## Folder Structure
+
+- `app/` - Next.js pages, API routes, and UI components
+- `app/api/auth/` - register, login, logout, and current-user APIs
+- `app/api/expenses/` - protected expense CRUD APIs
+- `app/api/admin/` - protected admin APIs
+- `app/components/` - dashboard, charts, forms, lists, dialogs, and toasts
+- `lib/` - database, authentication, and shared utility functions
+- `models/` - database access for users, expenses, and activities
+- `public/` - static assets
+
+## Notes
+
+- Normal registration creates a `user` role.
+- Admin access is only available to users with role `admin`.
+- Normal users can only see and manage their own expenses.
+- Admin users can view all expenses through the dashboard and can view all users and activities from `/admin`.
 
 ## Author
 

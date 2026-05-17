@@ -124,7 +124,7 @@ export function updateExpense(
 export function deleteExpense(id: number, userId: number, isAdmin = false): boolean {
   const result = db
     .prepare("DELETE FROM expenses WHERE id = ? AND (? = 1 OR userId = ?)")
-    .run(id, isAdmin ? 1 : 0, userId);
+    .run([id, isAdmin ? 1 : 0, userId]);
 
   return result.changes > 0;
 }

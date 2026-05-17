@@ -5,8 +5,19 @@ import { getUserById, type PublicUser, toPublicUser } from "@/models/user";
 
 export const AUTH_COOKIE_NAME = "spendly_token";
 
-const jwtSecret = process.env.JWT_SECRET ?? "spendly-local-demo-secret";
 const tokenMaxAgeSeconds = 60 * 60 * 24 * 7;
+
+function getJwtSecret() {
+  if (process.env.JWT_SECRET) {
+    return process.env.JWT_SECRET;
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("JWT_SECRET is required in production.");
+  }
+
+  return "spendly-local-demo-secret";
+}
 
 type TokenPayload = {
   userId: number;
@@ -15,14 +26,14 @@ type TokenPayload = {
 export type AuthUser = PublicUser;
 
 export function signToken(user: AuthUser) {
-  return jwt.sign({ userId: user.id }, jwtSecret, {
+  return jwt.sign({ userId: user.id }, getJwtSecret(), {
     expiresIn: tokenMaxAgeSeconds,
   });
 }
 
 export function verifyToken(token: string): TokenPayload | null {
   try {
-    const payload = jwt.verify(token, jwtSecret);
+    const payload = jwt.verify(token, getJwtSecret());
 
     if (
       typeof payload === "object" &&

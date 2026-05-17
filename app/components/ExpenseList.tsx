@@ -9,6 +9,7 @@ import {
   HeartPulse,
   Pencil,
   Receipt,
+  Search,
   ShoppingBag,
   Trash2,
   Utensils,
@@ -400,12 +401,16 @@ export default function ExpenseList({
           <label className="grid gap-1.5">
             <span className="text-sm font-medium text-slate-600">Search</span>
             <div className="relative">
+              <Search
+                size={15}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
               <input
                 type="search"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search title, category, description"
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 pr-10 text-sm text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-10 text-sm text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
               {searchQuery ? (
                 <button
@@ -431,6 +436,12 @@ export default function ExpenseList({
             </button>
           </div>
         </div>
+
+        {hasActiveFilters ? (
+          <div className="mb-4 text-sm font-medium text-slate-500">
+            Showing {filteredExpenses.length} of {expenses.length} expenses
+          </div>
+        ) : null}
 
         {groupedExpenses.length === 0 ? (
           <div className="py-12 text-center text-sm font-medium text-slate-500">

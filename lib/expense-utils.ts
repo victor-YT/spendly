@@ -15,6 +15,7 @@ export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
 
 export type Expense = {
   id: number;
+  userId: number;
   title: string;
   category: ExpenseCategory | string;
   amount: number;

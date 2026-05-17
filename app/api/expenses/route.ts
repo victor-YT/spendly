@@ -1,11 +1,20 @@
-import { createExpense, getAllExpenses } from "@/models/expense";
+import { requireAuth } from "@/lib/auth";
+import { createExpense, getAllExpenses, getExpensesForUser } from "@/models/expense";
 import { validateExpensePayload } from "@/lib/expense-utils";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const expenses = getAllExpenses();
+    const user = requireAuth(request);
+
+    if (user instanceof Response) {
+      return user;
+    }
+
+    const expenses =
+      user.role === "admin" ? getAllExpenses() : getExpensesForUser(user.id);
+
     return Response.json({ expenses });
   } catch (error) {
     console.error("Failed to fetch expenses", error);
@@ -25,7 +34,13 @@ export async function POST(request: Request) {
       return Response.json({ error: validation.message }, { status: 400 });
     }
 
-    const expense = createExpense(validation.data);
+    const user = requireAuth(request);
+
+    if (user instanceof Response) {
+      return user;
+    }
+
+    const expense = createExpense(validation.data, user.id);
     return Response.json({ expense }, { status: 201 });
   } catch (error) {
     console.error("Failed to create expense", error);

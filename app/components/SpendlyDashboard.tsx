@@ -1,6 +1,8 @@
 "use client";
 
-import { startTransition, useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { startTransition, useCallback, useEffect, useState } from "react";
 import ChartSection from "@/app/components/ChartSection";
 import ExpenseForm from "@/app/components/ExpenseForm";
 import ExpenseList from "@/app/components/ExpenseList";
@@ -10,6 +12,13 @@ import { formatCurrency } from "@/lib/expense-utils";
 
 type ApiError = {
   error?: string;
+};
+
+type CurrentUser = {
+  id: number;
+  name: string;
+  email: string;
+  role: "user" | "admin";
 };
 
 function sortExpenses(expenses: Expense[]) {
@@ -81,6 +90,8 @@ function SummaryCard({ label, value, trend }: SummaryCardProps) {
 }
 
 export default function SpendlyDashboard() {
+  const router = useRouter();
+  const [user, setUser] = useState<CurrentUser | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -119,7 +130,7 @@ export default function SpendlyDashboard() {
     }, 220);
   }
 
-  async function loadExpenses() {
+  const loadExpenses = useCallback(async () => {
     setIsLoading(true);
     setLoadError(null);
 
@@ -127,6 +138,11 @@ export default function SpendlyDashboard() {
       const response = await fetch("/api/expenses", {
         cache: "no-store",
       });
+
+      if (response.status === 401) {
+        router.replace("/login");
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(await getErrorMessage(response));
@@ -141,11 +157,43 @@ export default function SpendlyDashboard() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [router]);
 
   useEffect(() => {
-    void loadExpenses();
-  }, []);
+    async function loadSession() {
+      setIsLoading(true);
+      setLoadError(null);
+
+      try {
+        const response = await fetch("/api/auth/me", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          router.replace("/login");
+          return;
+        }
+
+        const data = (await response.json()) as { user: CurrentUser };
+        setUser(data.user);
+        await loadExpenses();
+      } catch {
+        setLoadError("Unable to check your login session.");
+        setIsLoading(false);
+      }
+    }
+
+    void loadSession();
+  }, [loadExpenses, router]);
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+
+    router.push("/login");
+    router.refresh();
+  }
 
   async function handleCreateExpense(payload: ExpensePayload) {
     setIsCreating(true);
@@ -325,14 +373,37 @@ export default function SpendlyDashboard() {
               Spendly
             </h1>
           </div>
-          <button
-            type="button"
-            onClick={openCreateModal}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-slate-800 active:scale-[0.98]"
-          >
-            <span className="text-base leading-none">+</span>
-            Add Expense
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            {user ? (
+              <div className="text-sm text-slate-600">
+                {user.name}{" "}
+                <span className="font-medium text-slate-950">({user.role})</span>
+              </div>
+            ) : null}
+            {user?.role === "admin" ? (
+              <Link
+                href="/admin"
+                className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 active:scale-[0.98]"
+              >
+                Admin
+              </Link>
+            ) : null}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 active:scale-[0.98]"
+            >
+              Logout
+            </button>
+            <button
+              type="button"
+              onClick={openCreateModal}
+              className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-slate-800 active:scale-[0.98]"
+            >
+              <span className="text-base leading-none">+</span>
+              Add Expense
+            </button>
+          </div>
         </header>
 
         <section className="grid gap-4 md:grid-cols-3">

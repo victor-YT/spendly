@@ -1,3 +1,4 @@
+import { requireAuth } from "@/lib/auth";
 import { deleteExpense, updateExpense } from "@/models/expense";
 import { validateExpensePayload } from "@/lib/expense-utils";
 
@@ -20,6 +21,12 @@ export async function PUT(
       return Response.json({ error: "Invalid expense id." }, { status: 400 });
     }
 
+    const user = requireAuth(request);
+
+    if (user instanceof Response) {
+      return user;
+    }
+
     const body = await request.json();
     const validation = validateExpensePayload(body);
 
@@ -27,7 +34,12 @@ export async function PUT(
       return Response.json({ error: validation.message }, { status: 400 });
     }
 
-    const expense = updateExpense(id, validation.data);
+    const expense = updateExpense(
+      id,
+      user.id,
+      validation.data,
+      user.role === "admin"
+    );
 
     if (!expense) {
       return Response.json({ error: "Expense not found." }, { status: 404 });
@@ -44,7 +56,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   context: RouteContext<"/api/expenses/[id]">
 ) {
   try {
@@ -55,7 +67,13 @@ export async function DELETE(
       return Response.json({ error: "Invalid expense id." }, { status: 400 });
     }
 
-    const deleted = deleteExpense(id);
+    const user = requireAuth(request);
+
+    if (user instanceof Response) {
+      return user;
+    }
+
+    const deleted = deleteExpense(id, user.id, user.role === "admin");
 
     if (!deleted) {
       return Response.json({ error: "Expense not found." }, { status: 404 });

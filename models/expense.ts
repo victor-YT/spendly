@@ -5,6 +5,7 @@ import type { Expense, ExpensePayload } from "@/lib/expense-utils";
 
 type ExpenseRow = {
   id: number;
+  userId: number;
   title: string;
   category: string;
   amount: number;
@@ -16,6 +17,7 @@ type ExpenseRow = {
 function toExpense(row: ExpenseRow): Expense {
   return {
     id: row.id,
+    userId: row.userId,
     title: row.title,
     category: row.category,
     amount: Number(row.amount),
@@ -28,7 +30,7 @@ function toExpense(row: ExpenseRow): Expense {
 export function getAllExpenses(): Expense[] {
   const rows = db
     .prepare(
-      `SELECT id, title, category, amount, date, description, createdAt
+      `SELECT id, userId, title, category, amount, date, description, createdAt
        FROM expenses
        ORDER BY date DESC, createdAt DESC, id DESC`
     )
@@ -37,14 +39,28 @@ export function getAllExpenses(): Expense[] {
   return rows.map(toExpense);
 }
 
-export function createExpense(data: ExpensePayload): Expense {
+export function getExpensesForUser(userId: number): Expense[] {
+  const rows = db
+    .prepare(
+      `SELECT id, userId, title, category, amount, date, description, createdAt
+       FROM expenses
+       WHERE userId = ?
+       ORDER BY date DESC, createdAt DESC, id DESC`
+    )
+    .all(userId) as ExpenseRow[];
+
+  return rows.map(toExpense);
+}
+
+export function createExpense(data: ExpensePayload, userId: number): Expense {
   const createdAt = new Date().toISOString();
   const result = db
     .prepare(
-      `INSERT INTO expenses (title, category, amount, date, description, createdAt)
-       VALUES (@title, @category, @amount, @date, @description, @createdAt)`
+      `INSERT INTO expenses (userId, title, category, amount, date, description, createdAt)
+       VALUES (@userId, @title, @category, @amount, @date, @description, @createdAt)`
     )
     .run({
+      userId,
       ...data,
       description: data.description ?? "",
       createdAt,
@@ -52,7 +68,7 @@ export function createExpense(data: ExpensePayload): Expense {
 
   const row = db
     .prepare(
-      `SELECT id, title, category, amount, date, description, createdAt
+      `SELECT id, userId, title, category, amount, date, description, createdAt
        FROM expenses
        WHERE id = ?`
     )
@@ -65,7 +81,12 @@ export function createExpense(data: ExpensePayload): Expense {
   return toExpense(row);
 }
 
-export function updateExpense(id: number, data: ExpensePayload): Expense | null {
+export function updateExpense(
+  id: number,
+  userId: number,
+  data: ExpensePayload,
+  isAdmin = false
+): Expense | null {
   const result = db
     .prepare(
       `UPDATE expenses
@@ -74,10 +95,13 @@ export function updateExpense(id: number, data: ExpensePayload): Expense | null 
            amount = @amount,
            date = @date,
            description = @description
-       WHERE id = @id`
+       WHERE id = @id
+         AND (@isAdmin = 1 OR userId = @userId)`
     )
     .run({
       id,
+      userId,
+      isAdmin: isAdmin ? 1 : 0,
       ...data,
       description: data.description ?? "",
     });
@@ -88,7 +112,7 @@ export function updateExpense(id: number, data: ExpensePayload): Expense | null 
 
   const row = db
     .prepare(
-      `SELECT id, title, category, amount, date, description, createdAt
+      `SELECT id, userId, title, category, amount, date, description, createdAt
        FROM expenses
        WHERE id = ?`
     )
@@ -97,7 +121,10 @@ export function updateExpense(id: number, data: ExpensePayload): Expense | null 
   return row ? toExpense(row) : null;
 }
 
-export function deleteExpense(id: number): boolean {
-  const result = db.prepare("DELETE FROM expenses WHERE id = ?").run(id);
+export function deleteExpense(id: number, userId: number, isAdmin = false): boolean {
+  const result = db
+    .prepare("DELETE FROM expenses WHERE id = ? AND (? = 1 OR userId = ?)")
+    .run(id, isAdmin ? 1 : 0, userId);
+
   return result.changes > 0;
 }

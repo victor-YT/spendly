@@ -1,5 +1,10 @@
 import { requireAuth } from "@/lib/auth";
-import { createExpense, getAllExpenses, getExpensesForUser } from "@/models/expense";
+import { logActivity } from "@/models/activity";
+import {
+  createExpense,
+  getAllExpenses,
+  getExpensesForUser,
+} from "@/models/expense";
 import { validateExpensePayload } from "@/lib/expense-utils";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +46,12 @@ export async function POST(request: Request) {
     }
 
     const expense = createExpense(validation.data, user.id);
+    logActivity({
+      userId: user.id,
+      action: "create expense",
+      details: `Created ${expense.title}`,
+    });
+
     return Response.json({ expense }, { status: 201 });
   } catch (error) {
     console.error("Failed to create expense", error);

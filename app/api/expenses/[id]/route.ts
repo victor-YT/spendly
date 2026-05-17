@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth";
+import { logActivity } from "@/models/activity";
 import { deleteExpense, updateExpense } from "@/models/expense";
 import { validateExpensePayload } from "@/lib/expense-utils";
 
@@ -45,6 +46,12 @@ export async function PUT(
       return Response.json({ error: "Expense not found." }, { status: 404 });
     }
 
+    logActivity({
+      userId: user.id,
+      action: "update expense",
+      details: `Updated ${expense.title}`,
+    });
+
     return Response.json({ expense });
   } catch (error) {
     console.error("Failed to update expense", error);
@@ -78,6 +85,12 @@ export async function DELETE(
     if (!deleted) {
       return Response.json({ error: "Expense not found." }, { status: 404 });
     }
+
+    logActivity({
+      userId: user.id,
+      action: "delete expense",
+      details: `Deleted expense #${id}`,
+    });
 
     return Response.json({ success: true, id });
   } catch (error) {

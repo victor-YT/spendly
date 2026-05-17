@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { createAuthCookie, signToken } from "@/lib/auth";
+import { logActivity } from "@/models/activity";
 import { getUserByEmail, toPublicUser } from "@/models/user";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +47,11 @@ export async function POST(request: Request) {
 
     const publicUser = toPublicUser(user);
     const token = signToken(publicUser);
+    logActivity({
+      userId: user.id,
+      action: "login",
+      details: `Logged in ${user.email}`,
+    });
 
     return Response.json(
       { user: publicUser },

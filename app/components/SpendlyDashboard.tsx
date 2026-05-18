@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useCallback, useEffect, useState } from "react";
+import { LogOut, ShieldCheck } from "lucide-react";
 import ChartSection from "@/app/components/ChartSection";
 import ExpenseForm from "@/app/components/ExpenseForm";
 import ExpenseList from "@/app/components/ExpenseList";
@@ -389,20 +390,32 @@ export default function SpendlyDashboard() {
               </div>
             ) : null}
             {user?.role === "admin" ? (
-              <Link
-                href="/admin"
-                className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 active:scale-[0.98]"
-              >
-                Admin
-              </Link>
+              <div className="group relative">
+                <Link
+                  href="/admin"
+                  aria-label="Admin"
+                  className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-slate-300 text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-100 active:scale-[0.98]"
+                >
+                  <ShieldCheck size={18} />
+                </Link>
+                <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-950 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-sm transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100">
+                  Admin
+                </span>
+              </div>
             ) : null}
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 active:scale-[0.98]"
-            >
-              Logout
-            </button>
+            <div className="group relative">
+              <button
+                type="button"
+                onClick={handleLogout}
+                aria-label="Logout"
+                className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-slate-300 text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-100 active:scale-[0.98]"
+              >
+                <LogOut size={18} />
+              </button>
+              <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-950 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-sm transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100">
+                Logout
+              </span>
+            </div>
             <button
               type="button"
               onClick={openCreateModal}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import UserAvatar from "@/app/components/UserAvatar";
 
 type AdminUser = {
   id: number;
@@ -11,6 +12,8 @@ type AdminUser = {
   role: "user" | "admin";
   createdAt: string;
 };
+
+type CurrentUser = AdminUser;
 
 type Activity = {
   id: number;
@@ -44,6 +47,7 @@ function formatDate(value: string) {
 
 export default function AdminPage() {
   const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("all");
@@ -81,6 +85,17 @@ export default function AdminPage() {
 
       const userData = (await userResponse.json()) as { users: AdminUser[] };
       setUsers(userData.users);
+
+      const currentUserResponse = await fetch("/api/auth/me", {
+        cache: "no-store",
+      });
+
+      if (currentUserResponse.ok) {
+        const currentUserData = (await currentUserResponse.json()) as {
+          user: CurrentUser;
+        };
+        setCurrentUser(currentUserData.user);
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unable to load users.");
       setIsLoading(false);
@@ -141,12 +156,25 @@ export default function AdminPage() {
               </p>
             </div>
           </div>
-          <Link
-            href="/"
-            className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 active:scale-[0.98]"
-          >
-            Dashboard
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            {currentUser ? (
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <UserAvatar name={currentUser.name} email={currentUser.email} />
+                <span>
+                  {currentUser.name}{" "}
+                  <span className="font-medium text-slate-950">
+                    ({currentUser.role})
+                  </span>
+                </span>
+              </div>
+            ) : null}
+            <Link
+              href="/"
+              className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 active:scale-[0.98]"
+            >
+              Dashboard
+            </Link>
+          </div>
         </header>
 
         {error ? (

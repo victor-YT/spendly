@@ -7,6 +7,7 @@ import ChartSection from "@/app/components/ChartSection";
 import ExpenseForm from "@/app/components/ExpenseForm";
 import ExpenseList from "@/app/components/ExpenseList";
 import ToastViewport, { type Toast } from "@/app/components/ToastViewport";
+import UserAvatar from "@/app/components/UserAvatar";
 import type { Expense, ExpensePayload } from "@/lib/expense-utils";
 import { formatCurrency } from "@/lib/expense-utils";
 
@@ -380,6 +381,7 @@ export default function SpendlyDashboard() {
                 <span className="font-medium text-slate-950">({user.role})</span>
               </div>
             ) : null}
+            {user ? <UserAvatar name={user.name} email={user.email} /> : null}
             {user?.role === "admin" ? (
               <Link
                 href="/admin"

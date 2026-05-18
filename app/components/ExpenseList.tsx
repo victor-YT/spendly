@@ -31,6 +31,7 @@ const DATE_RANGE_OPTIONS = ["All", "Last 7 days", "Last 30 days", "Last 90 days"
 type ExpenseListProps = {
   expenses: Expense[];
   title?: string;
+  showTitle?: boolean;
   showOwners?: boolean;
   readOnly?: boolean;
   processingIds: number[];
@@ -161,6 +162,7 @@ function ExpenseActions({
 export default function ExpenseList({
   expenses,
   title = "Expenses",
+  showTitle = true,
   showOwners = false,
   readOnly = false,
   processingIds,
@@ -376,11 +378,13 @@ export default function ExpenseList({
       ) : null}
 
       <section className="min-h-[28rem]">
-        <div className="pb-2">
-          <h2 className="text-lg font-semibold tracking-tight text-slate-950">
-            {title}
-          </h2>
-        </div>
+        {showTitle ? (
+          <div className="pb-2">
+            <h2 className="text-lg font-semibold tracking-tight text-slate-950">
+              {title}
+            </h2>
+          </div>
+        ) : null}
 
         <div className="mb-5 grid gap-3 lg:grid-cols-[180px_180px_minmax(0,1fr)_auto]">
           <label className="grid gap-1.5">

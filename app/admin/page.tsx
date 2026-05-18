@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { LayoutDashboard } from "lucide-react";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ChevronDown, LayoutDashboard } from "lucide-react";
 import ChartSection from "@/app/components/ChartSection";
 import ExpenseList from "@/app/components/ExpenseList";
 import UserAvatar from "@/app/components/UserAvatar";
@@ -67,6 +67,48 @@ function SummaryCard({
   );
 }
 
+function CollapsibleSection({
+  title,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full cursor-pointer items-center justify-between gap-4 p-6 text-left transition-colors duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-100"
+        aria-expanded={open}
+      >
+        <h2 className="text-lg font-semibold tracking-tight text-slate-950">
+          {title}
+        </h2>
+        <ChevronDown
+          size={20}
+          className={`shrink-0 text-slate-500 transition-transform duration-300 ${
+            open ? "rotate-180" : "rotate-0"
+          }`}
+        />
+      </button>
+      <div
+        className={`grid transition-all duration-300 ease-out ${
+          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="border-t border-slate-100 p-6">{children}</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
@@ -76,6 +118,9 @@ export default function AdminPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("all");
   const [selectedAction, setSelectedAction] = useState("all");
+  const [isExpensesOpen, setIsExpensesOpen] = useState(true);
+  const [isUsersOpen, setIsUsersOpen] = useState(true);
+  const [isActivitiesOpen, setIsActivitiesOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -198,7 +243,7 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="page-transition mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-sm font-semibold text-white">
@@ -243,9 +288,6 @@ export default function AdminPage() {
         ) : null}
 
         <section>
-          <h2 className="mb-4 text-lg font-semibold tracking-tight text-slate-950">
-            Overview
-          </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <SummaryCard label="Total users" value={String(users.length)} />
             <SummaryCard label="Total expenses" value={String(expenses.length)} />
@@ -267,20 +309,25 @@ export default function AdminPage() {
           <ChartSection expenses={expenses} />
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <CollapsibleSection
+          title="All expenses"
+          open={isExpensesOpen}
+          onToggle={() => setIsExpensesOpen((current) => !current)}
+        >
           <ExpenseList
-            title="All expenses"
             expenses={expenses}
+            showTitle={false}
             showOwners
             readOnly
             processingIds={[]}
           />
-        </section>
+        </CollapsibleSection>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold tracking-tight text-slate-950">
-            Users
-          </h2>
+        <CollapsibleSection
+          title="Users"
+          open={isUsersOpen}
+          onToggle={() => setIsUsersOpen((current) => !current)}
+        >
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[680px] text-left text-sm">
               <thead className="text-slate-500">
@@ -315,15 +362,16 @@ export default function AdminPage() {
               </tbody>
             </table>
           </div>
-        </section>
+        </CollapsibleSection>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <CollapsibleSection
+          title="User activities"
+          open={isActivitiesOpen}
+          onToggle={() => setIsActivitiesOpen((current) => !current)}
+        >
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-lg font-semibold tracking-tight text-slate-950">
-                User activities
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="text-sm text-slate-500">
                 {isLoading ? "Loading..." : `${activities.length} activities`}
               </p>
             </div>
@@ -413,7 +461,7 @@ export default function AdminPage() {
               </div>
             ) : null}
           </div>
-        </section>
+        </CollapsibleSection>
       </div>
     </main>
   );

@@ -25,7 +25,7 @@ Spendly is a single-page-style expense tracker built for an Internet Programming
 - Dashboard cards and Recharts visualisations
 - Live search by title, category, and description
 - User activity logging for register, login, logout, create, update, and delete
-- Admin page for viewing users and activities
+- Admin dashboard for viewing all users, all expenses, global spending analytics, and user activities
 
 ## Conceptual Entities
 
@@ -33,14 +33,33 @@ Spendly is a single-page-style expense tracker built for an Internet Programming
 - `expenses`
 - `user_activities`
 
-## Demo Admin
+## Assignment 2 Features
+
+- Modern React-based single-page-style interface
+- Backend API routes connected to a SQLite database
+- Three conceptual entities: users, expenses, and user activities
+- Full expense CRUD operations
+- Registration and login with password hashing
+- JWT authentication stored in an HttpOnly cookie
+- Role-based admin access
+- Live search and filters for expense records
+- Global admin dashboard with analytics and activity history
+- Database export included as `database-export.sql`
+
+## Demo Accounts
 
 The app seeds a demo admin account when the database is created.
+
+### Demo Admin
 
 - Email: `admin@spendly.local`
 - Password: `admin123`
 
-These can be changed with environment variables:
+The admin account can access the `/admin` page to view all users, all expenses, global spending analytics, and user activity history.
+
+You can also create normal user accounts from the Register page.
+
+The seeded admin credentials can be changed with environment variables:
 
 ```bash
 SEED_ADMIN_EMAIL=admin@spendly.local
@@ -108,7 +127,9 @@ Local database runtime files such as `expenses.db`, `expenses.db-shm`, and `expe
 - Normal registration creates a `user` role.
 - Admin access is only available to users with role `admin`.
 - Normal users can only see and manage their own expenses.
-- Admin users can view all expenses through the dashboard and can view all users and activities from `/admin`.
+- Admin users also have their own personal expense dashboard.
+- The `/admin` page provides a global admin view, including all users, all expenses, spending analytics, and user activity history.
+- Future expense dates are blocked by validation.
 
 ## Author
 

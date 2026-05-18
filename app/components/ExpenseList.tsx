@@ -15,6 +15,7 @@ import {
   Utensils,
 } from "lucide-react";
 import ConfirmDialog from "@/app/components/ConfirmDialog";
+import UserAvatar from "@/app/components/UserAvatar";
 import type { Expense, ExpensePayload } from "@/lib/expense-utils";
 import {
   EXPENSE_CATEGORIES,
@@ -29,12 +30,14 @@ const DATE_RANGE_OPTIONS = ["All", "Last 7 days", "Last 30 days", "Last 90 days"
 
 type ExpenseListProps = {
   expenses: Expense[];
+  title?: string;
   showOwners?: boolean;
+  readOnly?: boolean;
   processingIds: number[];
-  onDelete: (
+  onDelete?: (
     id: number
   ) => Promise<{ success: true } | { success: false; message: string }>;
-  onUpdate: (
+  onUpdate?: (
     id: number,
     payload: ExpensePayload
   ) => Promise<{ success: true } | { success: false; message: string }>;
@@ -157,7 +160,9 @@ function ExpenseActions({
 
 export default function ExpenseList({
   expenses,
+  title = "Expenses",
   showOwners = false,
+  readOnly = false,
   processingIds,
   onDelete,
   onUpdate,
@@ -263,6 +268,10 @@ export default function ExpenseList({
       return;
     }
 
+    if (!onUpdate) {
+      return;
+    }
+
     const result = await onUpdate(id, validation.data);
 
     if (!result.success) {
@@ -344,7 +353,7 @@ export default function ExpenseList({
 
   return (
     <>
-      {deleteDialogMounted && deleteCandidate ? (
+      {!readOnly && deleteDialogMounted && deleteCandidate ? (
         <ConfirmDialog
           open={deleteDialogOpen}
           title="Delete expense?"
@@ -353,6 +362,10 @@ export default function ExpenseList({
           isConfirming={processingIds.includes(deleteCandidate.id)}
           onCancel={closeDeleteDialog}
           onConfirm={() => {
+            if (!onDelete) {
+              return;
+            }
+
             void onDelete(deleteCandidate.id).then((result) => {
               if (result.success) {
                 closeDeleteDialog();
@@ -365,7 +378,7 @@ export default function ExpenseList({
       <section className="min-h-[28rem]">
         <div className="pb-2">
           <h2 className="text-lg font-semibold tracking-tight text-slate-950">
-            Expenses
+            {title}
           </h2>
         </div>
 
@@ -461,9 +474,7 @@ export default function ExpenseList({
                 <div>
                   {group.expenses.map((expense) => {
                     const Icon = getCategoryIcon(expense.category);
-                    const ownerLabel = expense.ownerName
-                      ? `Owner: ${expense.ownerName}`
-                      : `Owner: User #${expense.userId}`;
+                    const ownerName = expense.ownerName ?? `User #${expense.userId}`;
                     const isEditingOpen =
                       editingId === expense.id && editingPhase === "open";
                     const isEditingActive =
@@ -497,16 +508,27 @@ export default function ExpenseList({
                                   </div>
                                   <div className="mt-0.5 text-sm text-gray-500">
                                     {expense.category} · {group.label}
-                                    {showOwners ? ` · ${ownerLabel}` : ""}
                                   </div>
+                                  {showOwners ? (
+                                    <div className="mt-2 flex items-center gap-2 text-xs font-medium text-slate-500">
+                                      <UserAvatar
+                                        name={expense.ownerName}
+                                        email={expense.ownerEmail}
+                                        size="sm"
+                                      />
+                                      <span>Owner: {ownerName}</span>
+                                    </div>
+                                  ) : null}
                                 </div>
 
-                                <ExpenseActions
-                                  isBusy={isBusy}
-                                  isEditingActive={isEditingActive}
-                                  onEdit={() => openEditor(expense)}
-                                  onDelete={() => openDeleteDialog(expense)}
-                                />
+                                {!readOnly ? (
+                                  <ExpenseActions
+                                    isBusy={isBusy}
+                                    isEditingActive={isEditingActive}
+                                    onEdit={() => openEditor(expense)}
+                                    onDelete={() => openDeleteDialog(expense)}
+                                  />
+                                ) : null}
                               </div>
 
                               <div className="hidden min-w-0 lg:flex lg:items-center lg:gap-4">
@@ -517,8 +539,13 @@ export default function ExpenseList({
                                   {expense.category} · {group.label}
                                 </span>
                                 {showOwners ? (
-                                  <span className="shrink-0 text-sm font-medium text-slate-600">
-                                    {ownerLabel}
+                                  <span className="flex shrink-0 items-center gap-2 text-sm font-medium text-slate-600">
+                                    <UserAvatar
+                                      name={expense.ownerName}
+                                      email={expense.ownerEmail}
+                                      size="sm"
+                                    />
+                                    Owner: {ownerName}
                                   </span>
                                 ) : null}
                                 {expense.description ? (
@@ -536,16 +563,18 @@ export default function ExpenseList({
                             <span className="hidden text-right text-base font-semibold tabular-nums text-slate-950 lg:inline">
                               {formatCurrency(expense.amount)}
                             </span>
-                            <ExpenseActions
-                              isBusy={isBusy}
-                              isEditingActive={isEditingActive}
-                              onEdit={() => openEditor(expense)}
-                              onDelete={() => openDeleteDialog(expense)}
-                            />
+                            {!readOnly ? (
+                              <ExpenseActions
+                                isBusy={isBusy}
+                                isEditingActive={isEditingActive}
+                                onEdit={() => openEditor(expense)}
+                                onDelete={() => openDeleteDialog(expense)}
+                              />
+                            ) : null}
                           </div>
                         </div>
 
-                        {draft ? (
+                        {!readOnly && draft ? (
                           <div
                             className={`grid overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                               isEditingOpen

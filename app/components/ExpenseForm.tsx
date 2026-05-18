@@ -5,6 +5,7 @@ import type { ExpensePayload } from "@/lib/expense-utils";
 import {
   EXPENSE_CATEGORIES,
   getExpenseFieldErrors,
+  getTodayDateString,
   validateExpensePayload,
 } from "@/lib/expense-utils";
 
@@ -30,7 +31,7 @@ function createInitialFormState(): ExpenseFormState {
     title: "",
     category: EXPENSE_CATEGORIES[0],
     amount: "",
-    date: new Date().toISOString().slice(0, 10),
+    date: getTodayDateString(),
     description: "",
   };
 }
@@ -242,6 +243,7 @@ export default function ExpenseForm({
             <span className="text-sm font-medium text-slate-700">Date</span>
             <input
               type="date"
+              max={getTodayDateString()}
               value={form.date}
               onChange={(event) => updateField("date", event.target.value)}
               className={inputClass(Boolean(fieldErrors.date))}

@@ -16,6 +16,8 @@ export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
 export type Expense = {
   id: number;
   userId: number;
+  ownerName?: string;
+  ownerEmail?: string;
   title: string;
   category: ExpenseCategory | string;
   amount: number;
@@ -106,6 +108,8 @@ export function getExpenseFieldErrors(input: {
 
     if (Number.isNaN(parsedDate.getTime())) {
       errors.date = "Date is invalid.";
+    } else if (input.date > getTodayDateString()) {
+      errors.date = "Date cannot be in the future.";
     }
   }
 
@@ -114,6 +118,15 @@ export function getExpenseFieldErrors(input: {
   }
 
   return errors;
+}
+
+export function getTodayDateString() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 export function formatCurrency(amount: number) {

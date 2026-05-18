@@ -12,6 +12,8 @@ type ExpenseRow = {
   date: string;
   description: string | null;
   createdAt: string;
+  ownerName?: string | null;
+  ownerEmail?: string | null;
 };
 
 function toExpense(row: ExpenseRow): Expense {
@@ -24,15 +26,27 @@ function toExpense(row: ExpenseRow): Expense {
     date: row.date,
     description: row.description ?? "",
     createdAt: row.createdAt,
+    ownerName: row.ownerName ?? undefined,
+    ownerEmail: row.ownerEmail ?? undefined,
   };
 }
 
 export function getAllExpenses(): Expense[] {
   const rows = db
     .prepare(
-      `SELECT id, userId, title, category, amount, date, description, createdAt
-       FROM expenses
-       ORDER BY date DESC, createdAt DESC, id DESC`
+      `SELECT e.id,
+              e.userId,
+              e.title,
+              e.category,
+              e.amount,
+              e.date,
+              e.description,
+              e.createdAt,
+              u.name AS ownerName,
+              u.email AS ownerEmail
+       FROM expenses e
+       LEFT JOIN users u ON u.id = e.userId
+       ORDER BY e.date DESC, e.createdAt DESC, e.id DESC`
     )
     .all() as ExpenseRow[];
 
@@ -68,9 +82,19 @@ export function createExpense(data: ExpensePayload, userId: number): Expense {
 
   const row = db
     .prepare(
-      `SELECT id, userId, title, category, amount, date, description, createdAt
-       FROM expenses
-       WHERE id = ?`
+      `SELECT e.id,
+              e.userId,
+              e.title,
+              e.category,
+              e.amount,
+              e.date,
+              e.description,
+              e.createdAt,
+              u.name AS ownerName,
+              u.email AS ownerEmail
+       FROM expenses e
+       LEFT JOIN users u ON u.id = e.userId
+       WHERE e.id = ?`
     )
     .get(result.lastInsertRowid) as ExpenseRow | undefined;
 
@@ -112,9 +136,19 @@ export function updateExpense(
 
   const row = db
     .prepare(
-      `SELECT id, userId, title, category, amount, date, description, createdAt
-       FROM expenses
-       WHERE id = ?`
+      `SELECT e.id,
+              e.userId,
+              e.title,
+              e.category,
+              e.amount,
+              e.date,
+              e.description,
+              e.createdAt,
+              u.name AS ownerName,
+              u.email AS ownerEmail
+       FROM expenses e
+       LEFT JOIN users u ON u.id = e.userId
+       WHERE e.id = ?`
     )
     .get(id) as ExpenseRow | undefined;
 

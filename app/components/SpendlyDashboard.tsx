@@ -449,6 +449,7 @@ export default function SpendlyDashboard() {
             <ChartSection expenses={expenses} />
             <ExpenseList
               expenses={expenses}
+              showOwners={user?.role === "admin"}
               processingIds={processingIds}
               onDelete={handleDeleteExpense}
               onUpdate={handleUpdateExpense}

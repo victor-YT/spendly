@@ -20,6 +20,7 @@ import {
   EXPENSE_CATEGORIES,
   formatCurrency,
   getExpenseFieldErrors,
+  getTodayDateString,
   validateExpensePayload,
 } from "@/lib/expense-utils";
 
@@ -28,6 +29,7 @@ const DATE_RANGE_OPTIONS = ["All", "Last 7 days", "Last 30 days", "Last 90 days"
 
 type ExpenseListProps = {
   expenses: Expense[];
+  showOwners?: boolean;
   processingIds: number[];
   onDelete: (
     id: number
@@ -155,6 +157,7 @@ function ExpenseActions({
 
 export default function ExpenseList({
   expenses,
+  showOwners = false,
   processingIds,
   onDelete,
   onUpdate,
@@ -458,6 +461,9 @@ export default function ExpenseList({
                 <div>
                   {group.expenses.map((expense) => {
                     const Icon = getCategoryIcon(expense.category);
+                    const ownerLabel = expense.ownerName
+                      ? `Owner: ${expense.ownerName}`
+                      : `Owner: User #${expense.userId}`;
                     const isEditingOpen =
                       editingId === expense.id && editingPhase === "open";
                     const isEditingActive =
@@ -491,6 +497,7 @@ export default function ExpenseList({
                                   </div>
                                   <div className="mt-0.5 text-sm text-gray-500">
                                     {expense.category} · {group.label}
+                                    {showOwners ? ` · ${ownerLabel}` : ""}
                                   </div>
                                 </div>
 
@@ -509,6 +516,11 @@ export default function ExpenseList({
                                 <span className="shrink-0 text-sm text-gray-500">
                                   {expense.category} · {group.label}
                                 </span>
+                                {showOwners ? (
+                                  <span className="shrink-0 text-sm font-medium text-slate-600">
+                                    {ownerLabel}
+                                  </span>
+                                ) : null}
                                 {expense.description ? (
                                   <span className="min-w-0 flex-1 truncate text-sm text-gray-500">
                                     {expense.description}
@@ -606,6 +618,7 @@ export default function ExpenseList({
                                   />
                                   <input
                                     type="date"
+                                    max={getTodayDateString()}
                                     value={draft.date}
                                     onChange={(event) =>
                                       setDraft((current) =>

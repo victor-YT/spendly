@@ -158,14 +158,16 @@ export default function AdminPage() {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             {currentUser ? (
-              <div className="flex items-center gap-2 text-sm text-slate-600">
+              <div className="flex min-w-0 items-center gap-2">
                 <UserAvatar name={currentUser.name} email={currentUser.email} />
-                <span>
-                  {currentUser.name}{" "}
-                  <span className="font-medium text-slate-950">
-                    ({currentUser.role})
-                  </span>
-                </span>
+                <div className="min-w-0 leading-tight">
+                  <div className="truncate text-sm font-semibold text-slate-950">
+                    {currentUser.name || currentUser.email || "User"}
+                  </div>
+                  <div className="text-xs font-medium text-slate-500">
+                    {currentUser.role}
+                  </div>
+                </div>
               </div>
             ) : null}
             <Link

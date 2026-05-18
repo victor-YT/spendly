@@ -376,12 +376,18 @@ export default function SpendlyDashboard() {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             {user ? (
-              <div className="text-sm text-slate-600">
-                {user.name}{" "}
-                <span className="font-medium text-slate-950">({user.role})</span>
+              <div className="flex min-w-0 items-center gap-2">
+                <UserAvatar name={user.name} email={user.email} />
+                <div className="min-w-0 leading-tight">
+                  <div className="truncate text-sm font-semibold text-slate-950">
+                    {user.name || user.email || "User"}
+                  </div>
+                  <div className="text-xs font-medium text-slate-500">
+                    {user.role}
+                  </div>
+                </div>
               </div>
             ) : null}
-            {user ? <UserAvatar name={user.name} email={user.email} /> : null}
             {user?.role === "admin" ? (
               <Link
                 href="/admin"
@@ -451,7 +457,6 @@ export default function SpendlyDashboard() {
             <ChartSection expenses={expenses} />
             <ExpenseList
               expenses={expenses}
-              showOwners={user?.role === "admin"}
               processingIds={processingIds}
               onDelete={handleDeleteExpense}
               onUpdate={handleUpdateExpense}

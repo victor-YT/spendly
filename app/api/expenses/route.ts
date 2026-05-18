@@ -1,10 +1,6 @@
 import { requireAuth } from "@/lib/auth";
 import { logActivity } from "@/models/activity";
-import {
-  createExpense,
-  getAllExpenses,
-  getExpensesForUser,
-} from "@/models/expense";
+import { createExpense, getExpensesForUser } from "@/models/expense";
 import { validateExpensePayload } from "@/lib/expense-utils";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +13,7 @@ export async function GET(request: Request) {
       return user;
     }
 
-    const expenses =
-      user.role === "admin" ? getAllExpenses() : getExpensesForUser(user.id);
+    const expenses = getExpensesForUser(user.id);
 
     return Response.json({ expenses });
   } catch (error) {

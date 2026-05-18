@@ -131,6 +131,25 @@ Local database runtime files such as `expenses.db`, `expenses.db-shm`, and `expe
 - The `/admin` page provides a global admin view, including all users, all expenses, spending analytics, and user activity history.
 - Future expense dates are blocked by validation.
 
+
+## Workload Allocation
+
+This assignment was completed individually by Yutong Li.
+
+Main responsibilities:
+
+- Project setup and Next.js application structure
+- SQLite database schema and migration setup
+- User authentication, password hashing, and JWT handling
+- Expense CRUD APIs and dashboard UI
+- Recharts spending visualisations
+- Live search and filtering
+- Admin dashboard, user list, global expenses, and activity history
+- README and database export preparation
+
+
 ## Author
 
 Yutong Li
+Student ID: 25682865  
+This assignment was completed individually.

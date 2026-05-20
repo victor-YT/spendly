@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useCallback, useEffect, useState } from "react";
-import { LogOut, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import ChartSection from "@/app/components/ChartSection";
 import ExpenseForm from "@/app/components/ExpenseForm";
 import ExpenseList from "@/app/components/ExpenseList";
 import ToastViewport, { type Toast } from "@/app/components/ToastViewport";
 import UserAvatar from "@/app/components/UserAvatar";
+import UserProfilePanel from "@/app/components/UserProfilePanel";
 import type { Expense, ExpensePayload } from "@/lib/expense-utils";
 import { formatCurrency } from "@/lib/expense-utils";
 
@@ -101,6 +102,8 @@ export default function SpendlyDashboard() {
   const [isCreating, setIsCreating] = useState(false);
   const [isCreateModalMounted, setIsCreateModalMounted] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isProfilePanelMounted, setIsProfilePanelMounted] = useState(false);
+  const [isProfilePanelOpen, setIsProfilePanelOpen] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   function pushToast(message: string, tone: Toast["tone"]) {
@@ -129,6 +132,20 @@ export default function SpendlyDashboard() {
     setIsCreateModalOpen(false);
     window.setTimeout(() => {
       setIsCreateModalMounted(false);
+    }, 220);
+  }
+
+  function openProfilePanel() {
+    setIsProfilePanelMounted(true);
+    window.requestAnimationFrame(() => {
+      setIsProfilePanelOpen(true);
+    });
+  }
+
+  function closeProfilePanel() {
+    setIsProfilePanelOpen(false);
+    window.setTimeout(() => {
+      setIsProfilePanelMounted(false);
     }, 220);
   }
 
@@ -365,6 +382,15 @@ export default function SpendlyDashboard() {
         />
       ) : null}
 
+      {user && isProfilePanelMounted ? (
+        <UserProfilePanel
+          open={isProfilePanelOpen}
+          user={user}
+          onClose={closeProfilePanel}
+          onLogout={handleLogout}
+        />
+      ) : null}
+
       <div className="page-transition mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -378,7 +404,14 @@ export default function SpendlyDashboard() {
           <div className="flex flex-wrap items-center gap-3">
             {user ? (
               <div className="flex min-w-0 items-center gap-2">
-                <UserAvatar name={user.name} email={user.email} />
+                <button
+                  type="button"
+                  onClick={openProfilePanel}
+                  aria-label="Open profile"
+                  className="cursor-pointer rounded-full transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-100 active:scale-[0.98]"
+                >
+                  <UserAvatar name={user.name} email={user.email} />
+                </button>
                 <div className="min-w-0 leading-tight">
                   <div className="truncate text-sm font-semibold text-slate-950">
                     {user.name || user.email || "User"}
@@ -403,19 +436,6 @@ export default function SpendlyDashboard() {
                 </span>
               </div>
             ) : null}
-            <div className="group relative">
-              <button
-                type="button"
-                onClick={handleLogout}
-                aria-label="Logout"
-                className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-slate-300 text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-100 active:scale-[0.98]"
-              >
-                <LogOut size={18} />
-              </button>
-              <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-950 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-sm transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100">
-                Logout
-              </span>
-            </div>
             <button
               type="button"
               onClick={openCreateModal}

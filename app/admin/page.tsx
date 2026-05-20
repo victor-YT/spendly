@@ -7,6 +7,7 @@ import { ChevronDown, LayoutDashboard } from "lucide-react";
 import ChartSection from "@/app/components/ChartSection";
 import ExpenseList from "@/app/components/ExpenseList";
 import UserAvatar from "@/app/components/UserAvatar";
+import UserProfilePanel from "@/app/components/UserProfilePanel";
 import type { Expense } from "@/lib/expense-utils";
 import { formatCurrency } from "@/lib/expense-utils";
 
@@ -121,6 +122,8 @@ export default function AdminPage() {
   const [isExpensesOpen, setIsExpensesOpen] = useState(true);
   const [isUsersOpen, setIsUsersOpen] = useState(true);
   const [isActivitiesOpen, setIsActivitiesOpen] = useState(true);
+  const [isProfilePanelMounted, setIsProfilePanelMounted] = useState(false);
+  const [isProfilePanelOpen, setIsProfilePanelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -241,8 +244,40 @@ export default function AdminPage() {
     void loadAdminData();
   }, [loadAdminData]);
 
+  function openProfilePanel() {
+    setIsProfilePanelMounted(true);
+    window.requestAnimationFrame(() => {
+      setIsProfilePanelOpen(true);
+    });
+  }
+
+  function closeProfilePanel() {
+    setIsProfilePanelOpen(false);
+    window.setTimeout(() => {
+      setIsProfilePanelMounted(false);
+    }, 220);
+  }
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+
+    router.push("/login");
+    router.refresh();
+  }
+
   return (
     <main className="min-h-screen bg-slate-50">
+      {currentUser && isProfilePanelMounted ? (
+        <UserProfilePanel
+          open={isProfilePanelOpen}
+          user={currentUser}
+          onClose={closeProfilePanel}
+          onLogout={handleLogout}
+        />
+      ) : null}
+
       <div className="page-transition mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -257,7 +292,17 @@ export default function AdminPage() {
           <div className="flex flex-wrap items-center gap-3">
             {currentUser ? (
               <div className="flex min-w-0 items-center gap-2">
-                <UserAvatar name={currentUser.name} email={currentUser.email} />
+                <button
+                  type="button"
+                  onClick={openProfilePanel}
+                  aria-label="Open profile"
+                  className="cursor-pointer rounded-full transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-100 active:scale-[0.98]"
+                >
+                  <UserAvatar
+                    name={currentUser.name}
+                    email={currentUser.email}
+                  />
+                </button>
                 <div className="min-w-0">
                   <div className="truncate text-sm font-semibold text-slate-950">
                     {currentUser.name || currentUser.email || "User"}

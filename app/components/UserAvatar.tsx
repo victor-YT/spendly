@@ -1,7 +1,7 @@
 type UserAvatarProps = {
   name?: string | null;
   email?: string | null;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
 };
 
 function getInitial(name?: string | null, email?: string | null) {
@@ -10,7 +10,12 @@ function getInitial(name?: string | null, email?: string | null) {
 }
 
 export default function UserAvatar({ name, email, size = "md" }: UserAvatarProps) {
-  const sizeClass = size === "sm" ? "h-8 w-8 text-xs" : "h-9 w-9 text-sm";
+  const sizeClass =
+    size === "sm"
+      ? "h-8 w-8 text-xs"
+      : size === "lg"
+        ? "h-20 w-20 text-3xl"
+        : "h-9 w-9 text-sm";
 
   return (
     <div

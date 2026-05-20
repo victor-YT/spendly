@@ -28,7 +28,6 @@ export default function UserProfilePanel({
   const displayName = user.name?.trim() || user.email?.trim() || "User";
   const displayEmail = user.email?.trim() || "No email available";
   const roleLabel = user.role === "admin" ? "Admin" : "User";
-  const accountLabel = `${roleLabel} account`;
 
   useEffect(() => {
     if (!open) {
@@ -125,9 +124,6 @@ export default function UserProfilePanel({
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
               {roleLabel}
-            </span>
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-              {accountLabel}
             </span>
           </div>
         </div>

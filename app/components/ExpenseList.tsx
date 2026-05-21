@@ -426,7 +426,7 @@ export default function ExpenseList({
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               />
               <input
-                type="search"
+                type="text"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="Search title, category, description"

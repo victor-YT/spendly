@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 
 type ConfirmDialogProps = {
   open: boolean;
@@ -71,7 +72,7 @@ export default function ConfirmDialog({
     };
   }, [open, onCancel]);
 
-  return (
+  const dialog = (
     <div
       className={`fixed inset-0 z-40 flex items-center justify-center px-4 transition-all duration-200 ${
         open
@@ -142,4 +143,10 @@ export default function ConfirmDialog({
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(dialog, document.body);
 }
